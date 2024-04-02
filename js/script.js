@@ -1,5 +1,5 @@
 
-const apiKey = "insira sua key da API";
+const apiKey = "161b66486e9ac65da982ce8fd5f8fa46";
 
 
 const apiCountryURL = 'https://flagsapi.com/';

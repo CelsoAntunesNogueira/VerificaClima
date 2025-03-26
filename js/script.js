@@ -1,7 +1,5 @@
 
 const apiKey = "161b66486e9ac65da982ce8fd5f8fa46";
-
-
 const apiCountryURL = 'https://flagsapi.com/';
 const apiUnsplash = "https://source.unsplash.com/1600x900/?";
 
@@ -17,7 +15,6 @@ const humidityElement = document.querySelector("#humidity span");
 const windElement = document.querySelector("#wind span");
 
 const weatherContainer = document.querySelector("#weather-data");
-
 const errorMessageContainer = document.querySelector("#error-message");
 const loader = document.querySelector("#loader");
 
@@ -28,17 +25,25 @@ const toggleLoader = () => {
 
 //Funções
 const getWeatherData = async (city) => {
-  const apiWeatherURL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}&lang=pt_br`;
+ try {
+   toggleLoader(); 
+   
+    const apiWeatherURL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}&lang=pt_br`;
+    const res = await fetch(apiWeatherURL);
 
-
-
-  const res = await fetch(apiWeatherURL);
-  const data = await res.json();
-
-  toggleLoader();
-
-  return data;
-};
+     if (!res.ok){
+       throw new Error("Cidade não encontrada");
+     }
+   
+    const data = await res.json();
+    return data;
+    }catch (error) {
+     showErrorMessage(error.message);
+     return null;
+    }finally {   
+    toggleLoader();
+   }
+  };
 
 // Tratamento de erro
 const showErrorMessage = () => {

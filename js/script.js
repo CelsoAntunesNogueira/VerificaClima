@@ -1,7 +1,6 @@
-
-const apiKey = "161b66486e9ac65da982ce8fd5f8fa46";
+const apiKey = "161b66486e9ac65da982ce8fd5f8fa46"; // OpenWeather API
 const apiCountryURL = 'https://flagsapi.com/';
-const apiUnsplash = "https://source.unsplash.com/1600x900/?";
+const apiPexels = "u9JdtPbsagBBuhmaKGZQ4bzo2zgzjulguVmYIEJiJtjtSVqF8T7N980N"; // Pexels API
 
 const cityInput = document.querySelector("#city-input");
 const searchBtn = document.querySelector('#search');
@@ -23,35 +22,60 @@ const toggleLoader = () => {
   loader.classList.toggle("hide");
 };
 
-//Funções
+// Funções
 const getWeatherData = async (city) => {
- try {
-   toggleLoader(); 
-   
+  try {
+    toggleLoader(); 
+    
     const apiWeatherURL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}&lang=pt_br`;
     const res = await fetch(apiWeatherURL);
 
-     if (!res.ok){
-       throw new Error("Cidade não encontrada");
-     }
-   
+    if (!res.ok) {
+      throw new Error("Cidade não encontrada");
+    }
+
     const data = await res.json();
     return data;
-    }catch (error) {
-     showErrorMessage(error.message);
-     return null;
-    }finally {   
+  } catch (error) {
+    showErrorMessage(error.message);
+    return null;
+  } finally {   
     toggleLoader();
-   }
-  };
+  }
+};
+
+// Função para buscar imagens no Pexels
+const getBackgroundImage = async (city) => {
+  try {
+    const apiPexelsURL = `https://api.pexels.com/v1/search?query=${city}&per_page=1`;
+    const res = await fetch(apiPexelsURL, {
+      headers: {
+        Authorization: apiPexels
+      }
+    });
+
+    if (!res.ok) {
+      throw new Error("Imagem não encontrada");
+    }
+
+    const data = await res.json();
+    return data.photos[0].src.landscape; // URL da primeira imagem encontrada
+  } catch (error) {
+    console.error("Erro ao buscar imagem:", error);
+    return null;
+  }
+};
 
 // Tratamento de erro
 const showErrorMessage = () => {
   errorMessageContainer.classList.remove("hide");
 };
 
+// Função para mostrar os dados do clima
 async function showWeatherData(city) {
   const data = await getWeatherData(city);
+
+  if (!data) return;
 
   cityElement.innerText = data.name;
   tempElement.innerText = parseInt(data.main.temp);
@@ -61,12 +85,17 @@ async function showWeatherData(city) {
   humidityElement.innerText = `${data.main.humidity}%`;
   windElement.innerText = `${data.wind.speed}Km/h`;
 
-  document.body.style.backgroundImage = `url("${apiUnsplash + city}")`;
+  // Buscar imagem de fundo do Pexels
+  const backgroundImage = await getBackgroundImage(city);
+
+  if (backgroundImage) {
+    document.body.style.backgroundImage = `url("${backgroundImage}")`;
+  }
 
   weatherContainer.classList.remove('hide');
 }
 
-//Eventos
+// Eventos
 searchBtn.addEventListener("click", (e) => {
   e.preventDefault();
 
